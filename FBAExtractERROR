@@ -1,0 +1,94 @@
+//Script GUID:d54c27a2-b815-48c4-9916-9e404f34b5f2
+//Used for tracking history
+
+fbaLog =
+EXTRACT Timestamp : string,//col0
+traceID: string,//col1
+EndPoint: string,
+Origin: string,
+Destination: string,
+DepartureDate: string,
+ArrivalDate: string,
+ClassOfService: string,
+Passengers: string,
+Request: string,
+IsRetry: string,
+ServedFrom: string,
+Latency: string,
+UserMarketPcc: string,
+IsMobile: string,
+ImpressionGuid: string,
+IsExternalTraffic: string,
+Browser: string,
+NoOfResults: string,
+PriceDeviation: string,
+AnswerEnhancementType: string,
+Response: string
+FROM STREAMSET @"local/Travel/Logs/FlightBookingAnswer/BackendLogs/FBALogsHistory/"
+PATTERN "%Y-%m-%d.tsv"
+RANGE __date = ["2019-09-10", "2020-05-02"]
+USING DefaultTextExtractor(silent:true);
+
+fbaLog=SELECT * FROM fbaLog WHERE Timestamp != "Timestamp";
+//fbaLog =
+//    SELECT Extrac.Extractor(Timestamp) AS Month,
+//           Origin,
+//           Destination
+//    FROM fbaLog ;
+fbalog  =   SELECT  DISTINCT  
+            Origin,
+            Destination,
+            Extrac.Extractor(Timestamp) AS Month,
+            COUNT(ImpressionGuid) AS Count
+            FROM fbalog
+            GROUP BY Origin, Destination, Month;
+fbaLog =
+    SELECT *
+    FROM fbaLog
+    WHERE Month != "-1";
+
+OUTPUT fbaLog
+TO @"/local/Travel/FlightBookingAnswer/InternProject2020/Adarsh/FBA_TillDateF.tsv";
+
+C# :
+
+using Microsoft.SCOPE.Types;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using ScopeRuntime;
+
+public static class Extrac
+{
+    public static string Extractor(string str)
+    {
+        try
+        {
+            DateTime item = Convert.ToDateTime(str);
+            return item.ToString("MMMM");
+        }
+        catch(Exception e)
+        {
+            return "-1";
+        }
+    }
+}
+
+ERROR :
+{
+    "errorId": "E_CSC_USER_ROWSETVARIABLENOTFOUND",
+    "severity": "Error",
+    "component": "CSC",
+    "source": "User",
+    "message": "Rowset variable fbalog was not found.",
+    "description": "Rowset variables must be assigned to before they can be referenced.",
+    "resolution": "Assign a rowset to the rowset variable or remove the reference. Use fully qualified ddl name or ddl prefix if a ddl table reference is intended. For example: 'master.dbo.fbalog' OR '::dbo.fbalog'.",
+    "details": "at token 'fbalog', line 43\r\nnear the ###:\r\n**************\r\nCT  \n            Origin,\n            Destination,\n            Extrac.Extractor(Timestamp) AS Month,\n            COUNT(ImpressionGuid) AS Count\n            FROM  ### fbalog\n            GROUP BY Origin, Destination, Month;\nfbaLog =\n    SELECT *\n    FROM fbaLog\n    WHERE Month != \"-1\";\n\nOUTPUT fbaLog\nTO @\"/local/Travel/FlightB",
+    "internalDiagnostics": "jobId=3f2a0bbc-015a-47bf-b2fd-cee34d9a7d98, client=MW2SCH103031324,ScopeCompiler.CompilationException: E_CSC_USER_ROWSETVARIABLENOTFOUND: Rowset variable fbalog was not found.\nDescription:\nRowset variables must be assigned to before they can be referenced.\nResolution:\nAssign a rowset to the rowset variable or remove the reference. Use fully qualified ddl name or ddl prefix if a ddl table reference is intended. For example: 'master.dbo.fbalog' OR '::dbo.fbalog'.\r\n   at ScopeCompiler.FrontEnd.ScriptBinding.ResolveAnonymousImport(Token normalizedNameToken, Token originalNameToken)\r\n   at ScopeCompiler.FrontEnd.ScriptBinding.ResolveAndCheck(Statement current, LocalObjectReference localObjectReference)\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.ResolveAndCheckRowsetReference(ScriptBinding binding, LocalObjectReference localObjectReference)\r\n   at ScopeCompiler.FrontEnd.ScopeBinder.OnTableReference(Binding input, TableReference e)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.OnAliasedTableReferenceExpression(Binding input, AliasedTableReferenceExpression e)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.<>c__DisplayClass280_0.<BindInput>b__0()\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.OnSelectQuery(Binding input, SelectQuery e)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.OnQueryStatement(Binding input, QueryStatement e)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.VisitStatementsAndAddBinding(ScriptBinding inputBinding, IEnumerable`1 statements)\r\n   at ScopeCompiler.FrontEnd.SyntaxBinder.ProcessScript(Binding input, Script e, SyntaxNode[] children)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.TreeTransform`3.Visit(P input, IEnumerable`1 nodes)\r\n   at ScopeCompiler.FrontEnd.ScopeBinder.OnBatch(Binding input, Batch e)\r\n   at ScopeCompiler.VisitorContext`1.Transform[R](T node, Func`1 accept)\r\n   at ScopeCompiler.FrontEnd.CompilePassHelper.Run(Action pass, Compiler compiler, CompilerTimer timer, Boolean throwOnErrors)\r\n   at ScopeCompiler.FrontEnd.ScopeCompileStrategy.BindPass(Batch batch)\r\n   at ScopeCompiler.FrontEnd.FrontEndRunner.Execute()\r\n   at ScopeCompiler.FrontEnd.CompilePipeline.DoExecutePipeline()\r\n   at ScopeCompiler.FrontEnd.CompilePipeline.DoCompile()",
+    "helpLink": "",
+    "filePath": null,
+    "lineNumber": 43,
+    "startOffset": 1129,
+    "endOffset": 1135
+  }
