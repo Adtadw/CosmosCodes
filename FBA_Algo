@@ -1,0 +1,74 @@
+// Remove all Rows which have atleast one empty cell.
+
+FbaAlgo = 
+    EXTRACT
+        Time : string,
+        Origin : string,
+        Destination : string
+    FROM 
+    @"local/Travel/FlightBookingAnswer/InternProject2020/Adarsh/FBA_TillDate1.tsv"
+    USING DefaultTextExtractor(silent:true);
+
+Output =
+    SELECT RouteCounter.CalculateFrequencies(FbaLogs) AS Origin,
+           Destination,
+           Time,
+           Counter
+    FROM FbaAlgo;
+
+OUTPUT Output
+TO @"/local/Travel/FlightBookingAnswer/InternProject2020/Adarsh/FBADataExtraction.tsv";
+
+    
+
+C# File:
+
+using Microsoft.SCOPE.Types;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using ScopeRuntime;
+
+/*
+    ALGORITHM - 
+    1. Create and empty dictionary whose key is a struct of (Origin, Destination, Time) and
+        Whose value is the number of occurences of that tuple in Rowset.
+*/
+
+// Key of Dictionary should look like this.
+struct Row
+{
+    public string Time, Origin, Destination;
+}
+
+public class RouteCounter
+{
+
+    Dictionary<Row, int> MyDict = new Dictionary<Row, int>();
+    public RowSet CalculateFrequencies(RowSet input)
+    {
+        foreach(Row ele in input)
+        {
+            if(ele in MyDict)
+            {
+                MyDict[ele]++;
+            }
+            else
+            {
+                MyDict[ele] = 1;
+            }
+        }
+
+        Res = ToTable(MyDict);
+        /* 
+          Convert Dictionary into a Row having 
+            col0 : Origin,
+            col1 : destination,
+            col2 : Time,
+            col3 : Freqeuncy
+        */
+    }
+
+}
+
