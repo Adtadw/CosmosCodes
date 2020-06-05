@@ -1,0 +1,75 @@
+/*
+// SCHEMA OF COL0
+public class TripSegment
+    {
+
+        public string SourceAirportCode { get; set; }
+        public string DestinationAirportCode { get; set; }
+        public string DepartureDate { get; set; }
+    }
+
+    public class PassengerCount
+    {
+        public int ADT { get; set; }
+        public int CHD { get; set; }
+        public int INF { get; set; }
+        public int INS { get; set; }
+    }
+
+    public class RootObject
+    {
+        public IList<TripSegment> TripSegments { get; set; }
+        public int ClassOfService { get; set; }
+        public PassengerCount PassengerCount { get; set; }
+        public string DataSource { get; set; }
+    }
+    */
+    
+    using System;
+using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
+
+namespace MyCSharp
+{
+    
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+        /*ITEM IS NOT WORKING*/
+            dynamic item = JsonConvert.DeserializeObject("{
+
+"TripSegments": [
+                {
+                "SourceAirportCode": "acv",
+                  "DestinationAirportCode": "lax",
+                  "DepartureDate": "2019-08-03"
+                }
+              ],
+              "ClassOfService": 0,
+              "PassengerCount": {
+                "ADT": 1,
+                "CHD": 0,
+                "INF": 0,
+                "INS": 0
+              },
+              "DataSource": "NYCXW38MT"
+            }");
+                    string source = item.TripSegment.SourceAirportCode,
+                            destination = item.TripSegment.DestinationAirportCode,
+                            month = item.TripSegment.DepartureDate;
+
+/*STUFF IS WORKING*/
+        dynamic stuff = JsonConvert.DeserializeObject("{ 'Name': 'Jon Smith', 'Address': { 'City': 'New York', 'State': 'NY' }, 'Age': 42 }");
+
+            string name = stuff.Name;
+            string address = stuff.Address.City;
+
+        }
+    }
+}
+    
